@@ -1,7 +1,7 @@
 ![](static/booklab.png)
 
 
-A derived and lightened version of [BinderHub](https://github.com/jupyterhub/binderhub) for private repository on gitlab without kubernetes.
+A derived and lightened version of [BinderHub](https://github.com/jupyterhub/binderhub) for private repositories hosted on gitlab without kubernetes.
 
 
 What is Booklab
