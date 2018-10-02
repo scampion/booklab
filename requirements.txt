@@ -1,0 +1,7 @@
+GitPython
+Flask-OAuthlib
+pyaml==17.12.1
+cryptography
+redis
+docker
+uwsgi 

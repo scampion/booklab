@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Projects</title>
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div class="pure-g">
+        <div class="pure-u-1-5"></div>
+        <div class="pure-u-3-5">
+            <img src="{{ url_for('static', filename='booklab.png') }}" alt="">
+        </div>
+        <div class="pure-u-1-5"></div>
+    </div>
+    <div class="pure-g">
+        <div class="pure-u-1-5"></div>
+        <div class="pure-u-3-5"> {{ nbofrunners }} runner(s) available</div>
+        <div class="pure-u-1-5"></div>
+    </div>
+
+
+    <div class="pure-g">
+
+        <div class="pure-u-1-5"></div>
+        <div class="pure-u-3-5">
+            <table class="pure-table pure-table-horizontal">
+            <thead>
+                <tr>
+                    <th>Git repository</th>
+                    <th>Branches</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            {% for item in data %}
+                <tr>
+                <td> {{ item.path_with_namespace }} </td>
+                <td>
+                    {% for b in item.repo_branches %}
+                       {% if b.allgo != "none" %}
+                           <a href="{{ url_for('deploy', id=item.id, path=item.path_with_namespace, branch=b['name']) }}">
+                                <label>{{ b['name'] }} </label>
+                           </a>
+                       {% endif %}
+                        <br>
+                    {% endfor %}
+                </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+             </table>
+        </div>
+        <div class="pure-u-1-5"></div>
+    </div>
+</body>
+</html>

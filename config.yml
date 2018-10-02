@@ -1,0 +1,11 @@
+gitlab:
+  host: gitlab.irisa.fr
+  consumer_key: <your_key>
+  consumer_secret: <your_secret> 
+
+logfile: booklab.log
+
+callback:
+  scheme: http
+
+#ssh_expiration_time : 86400 # 24H

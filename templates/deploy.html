@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Projects</title>
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div class="pure-g">
+        <div class="pure-u-2-5"></div>
+        <div class="pure-u-1-5">
+            <img src="{{ url_for('static', filename='booklab.png') }}" alt="">
+        </div>
+        <div class="pure-u-2-5"></div>
+    </div>
+
+
+
+    <div class="pure-g">
+        <div class="pure-u-2-5"></div>
+        <div class="pure-u-1-5">
+            <div id="wait">
+                <img src="http://clipartmag.com/images/animated-globe-gif-19.gif" alt="">
+                <p style="text-align: center; font-size: 20px">Build in progress ...</p>
+                <p style="text-align: center; font-size: 20px">status : <span id="status">...</span></p>
+            </div>
+        </div>
+        <div class="pure-u-2-5"></div>
+    </div>
+
+        <div class="pure-u-3-24"></div>
+
+        <div class="pure-u-18-24">
+                <pre id="output" style="background: black; color: lightgray"></pre>
+        <div class="pure-u-3-24"></div>
+
+
+<script>
+    var output = document.getElementById('output');
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '{{ url_for('log', path=path, branch=branch) | safe}}');
+    xhr.send();
+
+    setInterval(function() {
+        output.textContent = xhr.responseText;
+    }, 1000);
+
+
+    setInterval(function() {
+        const req = new XMLHttpRequest();
+        req.open('GET', "{{ url_for('status', path=path, branch=branch) | safe}}", false);
+        req.send(null);
+
+        document.getElementById('status').innerHTML = req.responseText;
+        if(req.responseText == "run") { 	     	 
+	     setTimeout(function () {
+	         window.location.replace("{{ nburl }}");
+             }, 5000);
+        } ;
+    }, 2000);
+</script>
+
+
+
+    </div>
+</body>
+</html>
