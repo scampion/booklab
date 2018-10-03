@@ -54,6 +54,12 @@ Redis structure :
 
 Configuration is done with config.yml
 
+License:
+--------
+GNU AFFERO GENERAL PUBLIC LICENSE
+
+https://www.gnu.org/licenses/agpl-3.0.txt
+
 
 Install:
 --------
