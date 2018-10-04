@@ -1,7 +1,6 @@
 import hashlib
 import logging
 import os
-import socket
 from secrets import token_hex
 
 import redis

@@ -5,3 +5,4 @@ cryptography
 redis
 docker
 uwsgi 
+jupyter-repo2docker

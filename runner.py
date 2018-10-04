@@ -1,7 +1,7 @@
 import hashlib
 import logging
 import os
-import pwd
+import subprocess
 import stat
 import tempfile
 import time
@@ -105,7 +105,6 @@ class Runner:
         os.chmod(private_key_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         return private_key_path
 
-
     def build(self):
         """
         Build the docker image using jupyter-repo2docker
@@ -115,16 +114,14 @@ class Runner:
         """
         self.status("build")
         log.info("run repo2docker to produce image " + self.tag)
-        cmd = "jupyter-repo2docker --no-run --user-id %s --user-name %s --image-name %s /mnt/repo" % (
-            os.getuid(), pwd.getpwuid(os.getuid())[0], self.tag)
+        cmd = "/usr/bin/repo2docker --no-run " \
+              "--user-id %s --user-name %s " \
+              "--image-name %s %s" % (os.environ.get('BOOKLAB_UID'), os.environ.get('BOOKLAB_USER'),
+                                      self.tag, os.path.join(self.tmpdir, 'repo'))
         log.info("repo2docker cmd %s", cmd)
-        container = client.containers.run("jupyter/repo2docker:9956886", cmd, stderr=True,
-                                          volumes={
-                                              os.path.join(self.tmpdir, 'repo'): {'bind': '/mnt/repo', 'mode': 'rw'},
-                                              '/var/run/docker.sock': {'bind': '/var/run/docker.sock'}},
-                                          detach=True, auto_remove=True)
-
-        self.parse_logs(container)
+        process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        for line in iter(process.stdout.readline, b''):
+            self.log(line.rstrip())
         self.status("image")
 
     def parse_logs(self, container):
@@ -141,20 +138,21 @@ class Runner:
         self.status("run")
         taghostname = hashlib.sha1((self.path + self.branch + self.username).encode('utf8')).hexdigest()[0:8]
         traefik_labels = {"traefik.frontend.rule": "Host:%s.%s" % (taghostname, rc.hget("conf", "host").decode('utf8'))}
-        ep = "jupyter notebook --ip=0.0.0.0 " \
-             "--allow-root --no-browser " \
-             "--NotebookApp.token='%s'" % rc.get("token:%s:%s:%s" % (self.path, self.branch, self.username)).decode('utf8')
-        vol = {os.path.join(self.tmpdir, 'repo'): {'bind': '/home/%s' % pwd.getpwuid(os.getuid())[0], 'mode': 'rw'}}
-        container = client.containers.run(self.tag, ep, ports={"8888/tcp": get_port()}, detach=False, stderr=True,
-                                          volumes=vol,
-                                          labels=traefik_labels)
+        nbtoken = rc.get("token:%s:%s:%s" % (self.path, self.branch, self.username))
+        ep = "jupyter notebook --ip=0.0.0.0 --allow-root --no-browser --NotebookApp.token='%s'" % nbtoken.decode('utf8')
+        repodir = os.path.join(os.environ.get('BOOKLAB_TMP'), self.tmpdir.split(os.path.sep)[-1], "repo")
+        vol = {repodir: {'bind': '/home/%s' % os.environ.get('BOOKLAB_USER'), 'mode': 'rw'}}
+        self.log(ep)
+        self.log(vol)
+        client.containers.run(self.tag, ep, ports={"8888/tcp": get_port()}, detach=False, stderr=True, volumes=vol,
+                              labels=traefik_labels)
         self.push_backup()
 
     def push_backup(self):
         repodir = os.path.join(self.tmpdir, 'repo')
         repo = git.Repo(repodir)
         branch = "booklab %s %s" % (self.username, datetime.datetime.now())
-        branch = branch.replace(' ','_').replace('.','_').replace(':','_')
+        branch = branch.replace(' ', '_').replace('.', '_').replace(':', '_')
         repo.git.checkout('HEAD', b=branch)
         repo.index.add([f for f in os.listdir(repodir) if not f.startswith('.')])
         repo.index.commit("backup")
@@ -168,11 +166,12 @@ class Runner:
         rc.publish(self.tag, l)
         rc.rpush(self.lk, l)
         log.info(l)
-        print(l)
+        print("log", l)
 
 
 if __name__ == '__main__':
     id = token_hex(8)
+    print(id)
     while True:
         rc.sadd("runners", id)
         rc.setex("heartbeat:" + id, True, 10)
@@ -182,11 +181,9 @@ if __name__ == '__main__':
                 pb = rc.spop("to_build")
                 if pb:
                     path, branch, username = pb.decode('utf8').split(":")
-                    with tempfile.TemporaryDirectory() as tmpdir:
+                    with tempfile.TemporaryDirectory(prefix=id) as tmpdir:
+                        print(tmpdir)
                         r = Runner(path, branch, username, tmpdir)
-                        print(tmpdir)
-                        print(tmpdir)
-                        print(tmpdir)
                         r.run()
         time.sleep(2)
         print(".", end='', flush=True)

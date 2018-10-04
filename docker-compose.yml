@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  redis:
+    image: redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  reverse-proxy:
+    image: traefik
+    command: --api --docker --docker.watch
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  booklab:
+    build: .
+    volumes:
+      - .:/app
+    environment:
+     - BOOKLAB_REDIS_URI=redis://redis:6379/0
+    ports:
+      - "5000:5000"
+    labels:
+      - "traefik.frontend.rule=Host:localhost" # REPLACE WITH YOUR HOSTNAME
+    depends_on:
+      - "redis"
+    command:  ["/usr/local/bin/wait-for-it", "redis:6379", "--","/usr/local/bin/booklab"]
+
+  runner:
+    build: .
+    user: root
+    volumes:
+      - runner.py:/app/runner.py:nocopy
+    environment:
+     - BOOKLAB_REDIS_URI=redis://redis:6379/0
+     - BOOKLAB_UID=1234
+     - BOOKLAB_USER=booklab
+     - BOOKLAB_TMP=${TMPDIR}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${TMPDIR}:/tmp
+    depends_on:
+      - "redis"
+    command:  ["/usr/local/bin/wait-for-it", "redis:6379", "--","python3","/app/runner.py"]
