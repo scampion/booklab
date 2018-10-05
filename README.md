@@ -64,14 +64,13 @@ https://www.gnu.org/licenses/agpl-3.0.txt
 Install:
 --------
 
-install redis and setup up bind 0.0.0.0 and protection mode no
+1- Configure your DNS with the wildcard : *.example.com 
+2- Set TMPDIR and FQDN environment variable (ex TMPDIR=/tmp and FQDN=example.com)
+3- docker network create traefik
+4- docker-compose up 
 
-    sudo ./traefik --api --docker --docker.watch
-    docker build -t booklab .
-    docker run --label traefik.frontend.rule=Host:whoami.docker.localhost -e BOOKLAB_REDIS_URI=redis://cajon.irisa.fr:6379/0 -p 5000:5000  booklab
-
-NB: A docker compose is in progress.
-
+To improve number of runner: 
+	docker-compose scale runner=20
 
 
 Credits :

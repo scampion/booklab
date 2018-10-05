@@ -3,6 +3,8 @@ version: '3'
 services:
   redis:
     image: redis
+    networks:
+      - traefik
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 1s
@@ -20,6 +22,8 @@ services:
 
   booklab:
     build: .
+    networks:
+      - traefik
     volumes:
       - .:/app
     environment:
@@ -27,7 +31,7 @@ services:
     ports:
       - "5000:5000"
     labels:
-      - "traefik.frontend.rule=Host:localhost" # REPLACE WITH YOUR HOSTNAME
+      - "traefik.frontend.rule=Host:${FQDN}"
     depends_on:
       - "redis"
     command:  ["/usr/local/bin/wait-for-it", "redis:6379", "--","/usr/local/bin/booklab"]
@@ -35,6 +39,8 @@ services:
   runner:
     build: .
     user: root
+    networks:
+      - traefik
     volumes:
       - runner.py:/app/runner.py:nocopy
     environment:
@@ -48,3 +54,8 @@ services:
     depends_on:
       - "redis"
     command:  ["/usr/local/bin/wait-for-it", "redis:6379", "--","python3","/app/runner.py"]
+
+networks:
+  traefik:
+    external:
+      name: traefik

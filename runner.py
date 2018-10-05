@@ -145,7 +145,7 @@ class Runner:
         self.log(ep)
         self.log(vol)
         client.containers.run(self.tag, ep, ports={"8888/tcp": get_port()}, detach=False, stderr=True, volumes=vol,
-                              labels=traefik_labels)
+                              user=os.environ.get('BOOKLAB_USER'), labels=traefik_labels, network="traefik")
         self.push_backup()
 
     def push_backup(self):
