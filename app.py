@@ -55,9 +55,8 @@ def index():
 @app.route('/projects')
 def projects():
     if 'gitlab_token' in session:
-        me = gitlab.get('user')
-        id = me.data['id']
-        pr = gitlab.get('users/%s/projects' % id)
+        pr = gitlab.get('projects')
+        print(pr.data)
         return jsonify([{'id': p['id'], 'name': p['path_with_namespace']} for p in pr.data])
     else:
         return redirect(url_for('.login'))
