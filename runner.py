@@ -141,6 +141,9 @@ class Runner:
         nbtoken = rc.get("token:%s:%s:%s" % (self.path, self.branch, self.username))
         ep = "jupyter notebook --ip=0.0.0.0 --allow-root --no-browser --NotebookApp.token='%s'" % nbtoken.decode('utf8')
         repodir = os.path.join(os.environ.get('BOOKLAB_TMP'), self.tmpdir.split(os.path.sep)[-1], "repo")
+        chown = "chown -R %s %s" % (os.environ.get('BOOKLAB_USER'), repodir)
+        chown = "chmod -R 777 %s" % repodir # TODO fix with chown
+        subprocess.run(chown.split())
         vol = {repodir: {'bind': '/home/%s' % os.environ.get('BOOKLAB_USER'), 'mode': 'rw'}}
         self.log(ep)
         self.log(vol)
