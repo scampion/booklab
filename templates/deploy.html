@@ -1,38 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Projects</title>
-    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Booklabr (beta)</title>
+
+    <meta id="base-url" data-url="/">
+
+    <link href="/static/bootstrap.min.css" rel="stylesheet"></link>
+    <link href="/static/main.css" rel="stylesheet"></link>
+
 </head>
+
+
+
 <body>
-    <div class="pure-g">
-        <div class="pure-u-2-5"></div>
-        <div class="pure-u-1-5">
-            <img src="{{ url_for('static', filename='booklab.png') }}" alt="">
+
+<div class="container">
+    <div class="row">
+        <div id="logo-container">
+            <img id="logo" src="/static/booklab.png"/>
+            <br>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif" alt="">
         </div>
-        <div class="pure-u-2-5"></div>
     </div>
+</div>
 
 
 
-    <div class="pure-g">
-        <div class="pure-u-2-5"></div>
-        <div class="pure-u-1-5">
+<div id="main" class="container">
+    <div class="row">
+        <div class="col-lg-12">
             <div id="wait">
-                <img src="http://clipartmag.com/images/animated-globe-gif-19.gif" alt="">
-                <p style="text-align: center; font-size: 20px">Build in progress ...</p>
-                <p style="text-align: center; font-size: 20px">status : <span id="status">...</span></p>
+                <p style="text-align: center; font-size: 20px">Build in progress, please wait - status : <span id="status">...</span></p>
             </div>
         </div>
-        <div class="pure-u-2-5"></div>
     </div>
+</div>
 
-        <div class="pure-u-3-24"></div>
 
-        <div class="pure-u-18-24">
-                <pre id="output" style="background: black; color: lightgray"></pre>
-        <div class="pure-u-3-24"></div>
+<div id="main" class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <pre id="output" style="background: black; color: lightgray"></pre>
+        </div>
+    </div>
+</div>
 
 
 <script>

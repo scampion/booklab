@@ -1,58 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <title>Projects</title>
-    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Booklabr (beta)</title>
+
+    <meta id="base-url" data-url="/">
+
+    <script src="/static/jquery-3.3.1.min.js"></script>
+    <link href="/static/bootstrap.min.css" rel="stylesheet"></link>
+    <link href="/static/main.css" rel="stylesheet"></link>
+
 </head>
 <body>
-    <div class="pure-g">
-        <div class="pure-u-1-5"></div>
-        <div class="pure-u-3-5">
-            <img src="{{ url_for('static', filename='booklab.png') }}" alt="">
+
+    <script>
+        $(document).on('change', '#repos', function(e) {
+            $.getJSON("/branches/" + this.options[e.target.selectedIndex].value , null, function (data) {
+                $("#branches option").remove(); // Remove all <option> child tags.
+                $.each(data, function (index, item) { // Iterates through a collection
+                    $("#branches").append( // Append an object to the inside of the select box
+                        $("<option></option>") // Yes you can do this.
+                            .text(item)
+                            .val(item)
+                    );
+                });
+            });
+        });
+
+        $.getJSON("/projects", null, function (data) {
+            $("#repos option").remove(); // Remove all <option> child tags.
+            $.each(data, function (index, item) { // Iterates through a collection
+                $("#repos").append( // Append an object to the inside of the select box
+                    $("<option></option>") // Yes you can do this.
+                        .text(item.name)
+                        .val(item.id)
+                );
+            });
+            $("#repos").change();
+        });
+
+    </script>
+
+
+
+
+<div class="container">
+    <div class="row">
+        <div id="logo-container">
+            <img id="logo" src="/static/booklab.png"/>
         </div>
-        <div class="pure-u-1-5"></div>
     </div>
-    <div class="pure-g">
-        <div class="pure-u-1-5"></div>
-        <div class="pure-u-3-5"> {{ nbofrunners }} runner(s) available</div>
-        <div class="pure-u-1-5"></div>
-    </div>
+</div>
 
 
-    <div class="pure-g">
+<div id="main" class="container">
+    <div class="row">
+        <div class="col-lg-12">
 
-        <div class="pure-u-1-5"></div>
-        <div class="pure-u-3-5">
-            <table class="pure-table pure-table-horizontal">
-            <thead>
-                <tr>
-                    <th>Git repository</th>
-                    <th>Branches</th>
-                </tr>
-            </thead>
+            <div id="header" class="text-center">
+                <h3>Turn a GitLab repo into a collection of interactive notebooks</h3>
+                <div id="explanation">
+                    Have a repository full of Jupyter notebooks? With Booklab, open those notebooks in an executable
+                    environment, making your code immediately reproducible by anyone, anywhere.
+                </div>
+            </div>
 
-            <tbody>
 
-            {% for item in data %}
-                <tr>
-                <td> {{ item.path_with_namespace }} </td>
-                <td>
-                    {% for b in item.repo_branches %}
-                       {% if b.allgo != "none" %}
-                           <a href="{{ url_for('deploy', id=item.id, path=item.path_with_namespace, branch=b['name']) }}">
-                                <label>{{ b['name'] }} </label>
-                           </a>
-                       {% endif %}
-                        <br>
-                    {% endfor %}
-                </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-             </table>
-        </div>
-        <div class="pure-u-1-5"></div>
-    </div>
+            <form action="build" id="build-form" class="form jumbotron">
+                <h4 id="form-header" class='row'>Build and launch a repository</h4>
+
+                <div class="form-group row">
+                    <div  class="form-group col-md-12">
+                        <div class="input-group">
+                            <select class="form-control" id="repos" name="id" ></select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="form-group col-md-8">
+                        <label for="ref">Git branch</label>
+                        <select class="form-control" id="branches" name="branch" ></select>
+                    </div>
+
+
+                    <div class="form-group col-md-4">
+                        <button id="submit" class="btn-submit" type="submit">Launch</button>
+                    </div>
+                </div>
+            </form>
 </body>
 </html>

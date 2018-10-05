@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300');
+@import url('https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300');
+@import url('https://fonts.googleapis.com/css?family=Bangers');
+
+body{
+    font-family: 'Open Sans', sans-serif;
+}
+
+#header {
+    font-family: 'Bangers', cursive;
+}
+
+#explanation {
+    font-family: 'Open Sans', sans-serif;
+}
+
+#logo-container {
+    margin: 0 auto;
+}
+
+.btn-submit {
+    background-color: rgb(243, 162, 83);
+    box-shadow: 1px 1px rgba(0, 0, 0, .075);
+    color: white;
+    border: none;
+    height: 100%;
+    width: 100%;
+    border-radius: 4px;
+    font-family: 'Bangers', cursive;
+    font-size: 50px;
+}

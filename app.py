@@ -48,25 +48,51 @@ def request_wants_json():
 def index():
     rc.hset("conf", 'host', request.host)
     if 'gitlab_token' in session:
+        return render_template("index.html")
+    return redirect(url_for('.login'))
+
+
+@app.route('/projects')
+def projects():
+    if 'gitlab_token' in session:
         me = gitlab.get('user')
         id = me.data['id']
         pr = gitlab.get('users/%s/projects' % id)
-        data = pr.data.copy()
-        for p in data:  # aggregate branch metadata
-            repo_branches = []
-            for branch in gitlab.get(p['_links']['repo_branches']).data:
-                if type(branch) == dict:
-                    key = '%s:%s' % (p['path_with_namespace'], branch['name'])
-                    branch['booklab'] = rc.hget("status", key).decode('utf8') if rc.hexists("status",
-                                                                                            key) else "none"
-                    repo_branches += [branch]
-            p['repo_branches'] = repo_branches
-        if request.accept_mimetypes == "application/json":
-            return jsonify(data)
-        else:
-            nbofrunners = len([r for r in rc.smembers("runners") if rc.exists("heartbeat:" + r.decode('utf8'))])
-            return render_template("index.html", data=data, nbofrunners=nbofrunners)
-    return redirect(url_for('.login'))
+        return jsonify([{'id': p['id'], 'name': p['path_with_namespace']} for p in pr.data])
+    else:
+        return redirect(url_for('.login'))
+
+
+@app.route('/branches/<int:id>')
+def branches(id):
+    if 'gitlab_token' in session:
+        url = 'projects/%s/repository/branches' % id
+        branches = [branch['name'] for branch in gitlab.get(url).data if type(branch) == dict]
+        return jsonify(branches)
+    else:
+        return redirect(url_for('.login'))
+
+
+@app.route('/build')
+def build():
+    if 'gitlab_token' in session:
+        me = gitlab.get('user')
+        username = me.data['username']
+        branch = request.args.get('branch')
+        id = request.args.get('id')
+        path = gitlab.get('projects/%s' % id).data['path_with_namespace']
+
+        rc.hset("status", "%s:%s:%s" % (path, branch, username), "todo")
+        token = token_hex(16)
+        rc.setex("token:%s:%s:%s" % (path, branch, username), token, 60 * 60 * 24)
+        setup_ssh(id, path, branch, username)
+
+        nburl = "http://%s" % hashlib.sha1((path + branch + username).encode('utf8')).hexdigest()[0:8]
+        nburl += "." + request.host
+        nburl += "/tree/?token=%s" % token
+        return render_template("deploy.html", path=path, branch=branch, nburl=nburl)
+    else:
+        return redirect(url_for('.login'))
 
 
 @app.route('/deploy')
