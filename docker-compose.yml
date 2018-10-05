@@ -13,6 +13,8 @@ services:
 
   reverse-proxy:
     image: traefik
+    networks:
+      - traefik
     command: --api --docker --docker.watch
     ports:
       - "80:80"
