@@ -53,7 +53,7 @@ class Runner:
         self.branch = branch
         self.username = username
         self.tmpdir = tmpdir
-        self.tag = "%s:%s_%s" % (path, branch, username)
+        self.tag = "%s:%s_%s" % (path.lower(), branch, username)
         self.lk = "log:%s:%s:%s" % (path, branch, username)  # redis log key
         rc.delete(self.lk)
         rc.rpush(self.lk, "init")
