@@ -1,5 +1,5 @@
 GitPython
-Flask-OAuthlib
+authlib
 pyaml==17.12.1
 cryptography
 redis
