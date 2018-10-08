@@ -54,6 +54,24 @@ Redis structure :
 
 Configuration is done with config.yml
 
+Running a development instance:
+-------------------------------
+
+Define the `FQDN` and `TMPDIR` environment variables, e.g.
+
+```
+export FQDN=localhost
+export TMPDIR=/tmp
+```
+
+in the `config.yaml` file, define the values for `gitlab/host`, `gitlab/consumer_key`, `gitlab/consumer_secret`
+
+Then start an instance with docker-compose: 
+
+```
+docker-compose up
+```
+
 License:
 --------
 GNU AFFERO GENERAL PUBLIC LICENSE
