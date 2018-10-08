@@ -32,8 +32,9 @@ app.secret_key = 'development'
 
 
 def fetch_gitlab_token():
-    user = session['current_user']
-    d = json.loads(rc.get("oauth:%s" % user).decode('utf8'))
+    if not 'current_user' in session or not rc.exists("oauth:%s" % session['current_user']):
+        return
+    d = json.loads(rc.get("oauth:%s" % session['current_user']).decode('utf8'))
     return OAuth2Token.from_dict(d)
 
 
@@ -185,10 +186,12 @@ def setup_ssh(id, path, branch, username):
                             encryption_algorithm=serialization.NoEncryption())
 
     rc.setex("ssh:%s:%s:%s" % (path, branch, username), pem.decode('utf-8'), SSH_EXP_TIME)
-    data = {'id': id, 'title': 'booklab:%s:%s' % (branch, username), 'key': public_key.decode('utf-8'),
+    key_id = 'booklab:%s:%s' % (branch, username)
+    data = {'id': id, 'title': key_id, 'key': public_key.decode('utf-8'),
             'can_push': True}
-    it = gitlab.post('projects/%s/deploy_keys' % id, data=data)
-    assert it.status < 300, it.json()
+    oauth.gitlab.delete('projects/%s/deploy_keys/%s' % (id, key_id))
+    it = oauth.gitlab.post('projects/%s/deploy_keys' % id, data=data)
+    assert it.status_code < 300, it.json()
 
 
 if __name__ == "__main__":
