@@ -39,7 +39,6 @@ gitlab = oauth.remote_app('gitlab',
 
 
 def request_wants_json():
-    print(request.accept_mimetypes)
     best = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     return best == 'application/json' and request.accept_mimetypes[best] > request.accept_mimetypes['text/html']
 
@@ -56,7 +55,6 @@ def index():
 def projects():
     if 'gitlab_token' in session:
         pr = gitlab.get('projects')
-        print(pr.data)
         return jsonify([{'id': p['id'], 'name': p['path_with_namespace']} for p in pr.data])
     else:
         return redirect(url_for('.login'))
