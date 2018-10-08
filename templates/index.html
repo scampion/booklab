@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Booklabr (beta)</title>
+    <title>Booklab (beta)</title>
 
     <meta id="base-url" data-url="/">
 
@@ -88,5 +88,16 @@
                     </div>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<div id="footer" class="container">
+     <div class="row">
+        <div class="col-lg-12">
+            {{ username }} - {{ nbofrunners }} runners available - <a href="{{ url_for('logout') }}">logout</a>
+        </div>
+     </div>
+</div>
 </body>
 </html>

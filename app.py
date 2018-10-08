@@ -87,7 +87,9 @@ def login_required(f):
 @login_required
 def index():
     rc.hset("conf", 'host', request.host)
-    return render_template("index.html")
+    nbofrunners = len([r for r in rc.smembers("runners") if rc.exists("heartbeat:" + r.decode('utf8'))])
+    username = oauth.gitlab.get('user').json()['username']
+    return render_template("index.html", username=username, nbofrunners=nbofrunners)
 
 
 @app.route('/projects')
@@ -107,8 +109,7 @@ def branches(id):
 @app.route('/build')
 @login_required
 def build():
-    me = oauth.gitlab.get('user')
-    username = me.json()['username']
+    username = oauth.gitlab.get('user').json()['username']
     branch = request.args.get('branch')
     id = request.args.get('id')
     path = oauth.gitlab.get('projects/%s' % id).json()['path_with_namespace']
@@ -127,9 +128,7 @@ def build():
 @app.route('/deploy')
 @login_required
 def deploy():
-    me = oauth.gitlab.get('user')
-    username = me.json()['username']
-
+    username = oauth.gitlab.get('user').json()['username']
     id = request.args.get('id')
     path = request.args.get('path')
     branch = request.args.get('branch')
@@ -148,8 +147,7 @@ def deploy():
 @app.route('/status')
 @login_required
 def status():
-    me = oauth.gitlab.get('user')
-    username = me.json()['username']
+    username = oauth.gitlab.get('user').json()['username']
     path = request.args.get('path')
     branch = request.args.get('branch')
     status = rc.hget("status", "%s:%s:%s" % (path, branch, username))
@@ -162,8 +160,7 @@ def status():
 @app.route('/log')
 @login_required
 def log():
-    me = oauth.gitlab.get('user')
-    username = me.json()['username']
+    username = oauth.gitlab.get('user').json()['username']
     path = request.args.get('path')
     branch = request.args.get('branch')
 
